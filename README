@@ -1,0 +1,76 @@
+
+Fonctionnalités implémentées
+Mouvement du Tank :
+
+
+
+Objectifs à Collecter :
+
+Des sphères jaunes sont dispersées dans la scène. Le joueur doit les collecter en entrant en collision avec elles.
+
+Chaque objectif collecté augmente le score de 1 point.
+
+Ennemis :
+
+Des ennemis (cubes rouges) se déplacent aléatoirement dans la scène.
+
+Si le tank entre en collision avec un ennemi, le joueur perd 1 point (le score ne peut pas devenir négatif).
+
+
+
+Environnement 3D :
+
+La scène comprend un terrain généré à partir d'une heightmap, un ciel (skybox), et des objets supplémentaires (boîtes, cylindres, sphères) pour enrichir l'environnement.
+
+Des lumières directionnelles et ponctuelles sont ajoutées pour éclairer la scène.
+
+Détection de Collisions :
+
+Les collisions entre le tank, les objectifs et les ennemis sont gérées à l aide de la méthode intersectsMesh de Babylon.js.
+
+
+
+Structure du Code
+Le code est organisé en plusieurs fonctions principales :
+
+startGame : Initialise le moteur Babylon.js, crée la scène, et démarre la boucle de rendu.
+
+createScene : Crée la scène, le terrain, les lumières, les objets, les ennemis, et les objectifs.
+
+createTank : Crée et configure le tank contrôlé par le joueur.
+
+createObjectives : Génère les objectifs à collecter.
+
+createEnemies : Génère les ennemis qui se déplacent aléatoirement.
+
+checkObjectiveCollisions : Vérifie les collisions entre le tank et les objectifs.
+
+checkEnemyCollisions : Vérifie les collisions entre le tank et les ennemis.
+
+updateEnemies : Met à jour la position des ennemis pour qu ils se déplacent vers le tank.
+
+checkGameOver : Vérifie si le joueur a gagné ou perdu.
+
+Comment Utiliser
+Cloner le projet :
+
+bash
+Copy
+git clone https://github.com/votre-utilisateur/votre-projet.git
+cd votre-projet
+Ouvrir le fichier HTML :
+
+Ouvrez le fichier index.html dans un navigateur web compatible avec WebGL (Chrome, Firefox, Edge, etc.).
+
+Contrôles :
+
+Z ou Flèche Haut : Avancer.
+
+S ou Flèche Bas : Reculer.
+
+Q ou Flèche Gauche : Tourner à gauche.
+
+D ou Flèche Droite : Tourner à droite.
+
+
+
