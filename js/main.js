@@ -82,8 +82,7 @@ function checkObjectiveCollisions(tank, objectives) {
             score += 1; // Augmente le score
             scoreDisplay.textContent = "Score: " + score; // Met à jour l'affichage
 
-            objective.setEnabled(false); // Désactive l'objectif après collecte
-            //objective.dispose(); 
+            //objective.setEnabled(false); // Désactive l'objectif après collecte
             console.log("Score:", score);
         }
     }
@@ -182,17 +181,85 @@ function createFollowCamera(scene, target) {
 }
 
 let zMovement = 5;
+
+
 function createTank(scene) {
     let tank = new BABYLON.MeshBuilder.CreateBox("heroTank", {height:1, depth:6, width:6}, scene);
     let tankMaterial = new BABYLON.StandardMaterial("tankMaterial", scene);
-    tankMaterial.diffuseColor = new BABYLON.Color3.Red;
-    tankMaterial.emissiveColor = new BABYLON.Color3.Blue;
+    tankMaterial.diffuseColor = new BABYLON.Color3.Green;
+    tankMaterial.emissiveColor = new BABYLON.Color3.White;
     tank.material = tankMaterial;
 
-    // By default the box/tank is in 0, 0, 0, let's change that...
     tank.position.y = 0.6;
-    tank.speed = 1;
+    tank.speed = 2;
     tank.frontVector = new BABYLON.Vector3(0, 0, 1);
+    tank.checkCollisions = true;
+
+    let cannon = BABYLON.MeshBuilder.CreateCylinder("cannon", {diameter: 0.5, height: 3}, scene);
+    cannon.parent = tank;
+    cannon.position.z = 3;
+    cannon.position.y = 1;
+    cannon.rotation.x = Math.PI / 2;
+
+    let leftTrack = BABYLON.MeshBuilder.CreateBox("leftTrack", {height: 0.5, depth: 6, width: 1}, scene);
+    let rightTrack = BABYLON.MeshBuilder.CreateBox("rightTrack", {height: 0.5, depth: 6, width: 1}, scene);
+    leftTrack.parent = tank;
+    rightTrack.parent = tank;
+    leftTrack.position.x = -3;
+    rightTrack.position.x = 3;
+    leftTrack.position.y = -0.3;
+    rightTrack.position.y = -0.3;
+
+    let particleSystem = new BABYLON.ParticleSystem("smoke", 2000, scene);
+    particleSystem.particleTexture = new BABYLON.Texture("textures/smoke.png", scene);
+    particleSystem.emitter = tank;
+    particleSystem.minEmitPower = 1;
+    particleSystem.maxEmitPower = 3;
+    particleSystem.start();
+
+    function createExplosion(position) {
+        let explosion = new BABYLON.ParticleSystem("explosion", 200, scene);
+        explosion.particleTexture = new BABYLON.Texture("textures/flare.png", scene);
+        explosion.emitter = position;
+        explosion.minEmitPower = 5;
+        explosion.maxEmitPower = 10;
+        explosion.color1 = new BABYLON.Color4(1, 0.5, 0, 1);
+        explosion.color2 = new BABYLON.Color4(1, 0, 0, 1);
+        explosion.minSize = 0.5;
+        explosion.maxSize = 1.5;
+        explosion.gravity = new BABYLON.Vector3(0, -9.81, 0);
+        explosion.targetStopDuration = 0.5;
+        explosion.start();
+        
+        setTimeout(() => {
+            explosion.dispose();
+        }, 1000);
+    }
+
+    tank.shoot = function() {
+        let projectile = BABYLON.MeshBuilder.CreateSphere("projectile", {diameter: 0.5}, scene);
+        projectile.material = new BABYLON.StandardMaterial("projectileMaterial", scene);
+        projectile.material.diffuseColor = new BABYLON.Color3.Yellow;
+        projectile.position = cannon.absolutePosition.clone();
+        
+        projectile.physicsImpostor = new BABYLON.PhysicsImpostor(
+            projectile, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 1, restitution: 0.9 }, scene
+        );
+        
+        let force = tank.frontVector.normalize().scale(50);
+        projectile.physicsImpostor.applyImpulse(force, projectile.getAbsolutePosition());
+        
+        projectile.physicsImpostor.registerOnPhysicsCollide(scene.meshes, function() {
+            createExplosion(projectile.position);
+            projectile.dispose();
+        });
+    };
+
+    window.addEventListener("keydown", (event) => {
+        if (event.code === "Space") {
+            tank.shoot();
+        }
+    });
 
     tank.checkCollisions = true;
     tank.move = () => {
